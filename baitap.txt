@@ -1,0 +1,26 @@
++ Khởi tạo project với Spring boot sử dụng build tool với Gradle
++ Sử dụng Spring boot với Java (Concurrency) collections, implement các chức năng sau cho người dùng:
+- Thích 1 bộ phim bất kì
+- Liệt kê danh sách các bộ phim ưu thích
+- Xóa bỏ 1 bộ phim khỏi danh sách yêu thích
+- Viết Unit Test
+- Có thể sử dụng lombok để generate code cho các models
++ Nâng cao hơn
+- Phim có thể là phim lẻ hoặc series
+- Thêm chức năng đánh giá số sao (start rating) cho người dùng
+
+-> Chia ra 2 Controller
+MovieController
+- Phim có thể là phim lẻ hoặc series
+FavoriteMovieController
+- Liệt kê danh sách các bộ phim ưu thích
+- Thêm chức năng đánh giá số sao (start rating) cho người dùng
+- Thích 1 bộ phim bất kì
+
+Model
+Movie(id = uuid, name = String, type = [movie, series])
+- request
+CREATE Movie(name, type)
+READ Movie(name, type)
+UPDATE Movie(id, name, type)
+DELETE Movie(id)
