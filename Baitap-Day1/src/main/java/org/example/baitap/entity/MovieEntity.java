@@ -28,10 +28,17 @@ public class MovieEntity {
     @Enumerated(EnumType.STRING)
     private MovieType movieType;
 
+    @Column(nullable = false)
+    private Long likeCount;
+
+    @Version
+    private long version;
+
     @Builder
-    public MovieEntity(String name, MovieStatus movieStatus, MovieType movieType){
+    public MovieEntity(String name, MovieStatus movieStatus, MovieType movieType, Long likeCount){
         this.name = name;
         this.movieStatus = movieStatus;
         this.movieType = movieType;
+        this.likeCount = likeCount != null ? likeCount : 0L;
     }
 }

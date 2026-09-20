@@ -3,22 +3,25 @@ package org.example.baitap.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.baitap.dto.request.CreateMovieRequest;
+import org.example.baitap.dto.request.DeleteMovieRequest;
 import org.example.baitap.dto.response.MovieResponse;
 import org.example.baitap.entity.MovieEntity;
 import org.example.baitap.model.enums.MovieStatus;
 import org.example.baitap.repository.jpa.MovieRepositoryJpa;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MovieService {
     private final MovieRepositoryJpa movieRepositoryJpa;
 
-    // Save
+    // POST - [/api/create/movies]
     @Transactional
     public MovieResponse saveMovie(CreateMovieRequest request) {
         Optional<MovieEntity> existingMovie = movieRepositoryJpa.findByName(request.getName());
@@ -43,8 +46,40 @@ public class MovieService {
         return toResponse(savedMovie);
     }
 
-    private MovieResponse toResponse(MovieEntity entity){
-        if (entity == null){
+    // GET - [/api/getAll/movies]
+    public List<MovieResponse> getAllMovie() {
+        return movieRepositoryJpa.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // PATCH - [/api/update/movies]
+    public MovieResponse updateMovie(CreateMovieRequest request) {
+        MovieEntity entity = movieRepositoryJpa
+                .findByNameAndMovieStatus(request.getName(), MovieStatus.ACTIVE)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found"));
+
+        entity.setName(request.getName());
+        entity.setMovieStatus(MovieStatus.ACTIVE);
+        entity.setMovieType(request.getMovieType());
+
+        return toResponse(entity);
+    }
+
+    // Delete - [/api/delete/movies]
+    public boolean deleteMovie(DeleteMovieRequest request){
+        MovieEntity entity = movieRepositoryJpa
+                .findById(request.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found"));
+
+        entity.setMovieStatus(MovieStatus.INACTIVE);
+        movieRepositoryJpa.save(entity);
+        return true;
+    }
+
+    private MovieResponse toResponse(MovieEntity entity) {
+        if (entity == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Movie entity cannot be null");
         }
         return MovieResponse.builder()
@@ -53,7 +88,7 @@ public class MovieService {
                 .build();
     }
 
-    private MovieEntity toEntity(CreateMovieRequest request){
+    private MovieEntity toEntity(CreateMovieRequest request) {
         return MovieEntity.builder()
                 .movieStatus(MovieStatus.ACTIVE)
                 .movieType(request.getMovieType())
